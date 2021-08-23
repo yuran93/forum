@@ -1,0 +1,64 @@
+version: "3.7"
+
+services:
+  backend:
+    build:
+      args:
+        user: forum
+        uid: 1000
+      context: ./backend
+      dockerfile: Dockerfile
+    image: forum
+    container_name: forum-backend
+    restart: unless-stopped
+    working_dir: /var/www/
+    # command: bash -c 'composer dump-autoload && composer install && php artisan migrate'
+    volumes:
+      - ./backend:/var/www
+    networks:
+      - forum
+
+  nginx:
+    image: nginx:alpine
+    container_name: forum-nginx
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - ./backend:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d/
+    networks:
+      - forum
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 8001:8080
+    container_name: forum-frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  mysql:
+    image: mysql:5.7
+    container_name: forum-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: forum
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_PASSWORD: password
+      MYSQL_USER: forum
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./docker-compose/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - forum
+    ports:
+      - 33061:3306
+
+networks:
+  forum:
+    driver: bridge

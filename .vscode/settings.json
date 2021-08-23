@@ -1,0 +1,12 @@
+{
+    "launch": {
+        "configurations": [],
+        "compounds": [],
+    },
+    "[vue]": {
+        "editor.tabSize": 2
+    },
+    "[javascript]": {
+        "editor.tabSize": 2
+    }
+}
